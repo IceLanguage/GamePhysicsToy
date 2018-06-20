@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using LinHowe_Algorithm;
 using CollisionDetection;
+using System.Linq;
 
 namespace LinHowe_GamePhysics.NewtonPendulum
 {
@@ -29,6 +30,7 @@ namespace LinHowe_GamePhysics.NewtonPendulum
         //重力
         private const float gravity = 9.8f;
 
+        private int curBall = 0;
         //计算小球的位置
         private static System.Func<float, Vector3, Vector3> GetNowPosFromAngle = (angle, centerPos) =>
           {
@@ -43,6 +45,7 @@ namespace LinHowe_GamePhysics.NewtonPendulum
         private void Awake()
         {
             spheres = FindObjectsOfType<SphereComponent>();
+            spheres = spheres.OrderBy(x => x.Sphere.center.x).ToArray();
             initialSpheresPos = new Vector3[spheres.Length];
             sphereCentersPos = new Vector3[spheres.Length];
             spheresVelocity = new Vector3[spheres.Length];
@@ -78,14 +81,22 @@ namespace LinHowe_GamePhysics.NewtonPendulum
         {
             for (int i = 0; i < spheres.Length; ++i)
             {
-                for (int j = 0; j < spheres.Length; ++j)
-                {
-                    if (i == j) continue;
-                    if (spheres[i].HasCheckedSphere == spheres[j]) continue;
-                    if (IntersectionTest.Check_Sphere_Sphere(spheres[i].Sphere, spheres[j].Sphere))
-                    {
+                //for (int j = i+1; j < spheres.Length; ++j)
+                //{
 
-                    }
+                //    if (IntersectionTest.Check_Sphere_Sphere(spheres[i].Sphere, spheres[j].Sphere))
+                //    {
+                //        spheresVelocity[j] += spheresVelocity[i];
+                //        spheresVelocity[i] = Vector3.zero;
+                //    }
+                //}
+                if (curBall == i) continue;
+                if (IntersectionTest.Check_Sphere_Sphere(spheres[i].Sphere, spheres[curBall].Sphere))
+                {
+                    spheresVelocity[i] += spheresVelocity[curBall];
+                    spheresVelocity[curBall] = Vector3.zero;
+                    curBall = i;
+                    break;
                 }
             }
         }
@@ -148,6 +159,7 @@ namespace LinHowe_GamePhysics.NewtonPendulum
                         float yoffset = h + center.y - spherePos.y;
                         if (yoffset > LineLength)
                         {
+                            //这里存在缺陷
                             h = 0;
                             yoffset = h + center.y - spherePos.y;
                             newspeed.y = -newspeed.y;
@@ -187,6 +199,7 @@ namespace LinHowe_GamePhysics.NewtonPendulum
         [ContextMenu("初始化牛顿摆")]
         public void Init()
         {
+            curBall = 0;
             for (int i = 0; i < spheres.Length; ++i)
             {
                 spheres[i].transform.position = initialSpheresPos[i];
@@ -199,7 +212,7 @@ namespace LinHowe_GamePhysics.NewtonPendulum
         {
             Init();
             float angle = Random.Range(5f, 15f);
-            Vector3 v = GetNowPosFromAngle(angle, sphereCentersPos[0]);
+            Vector3 v = GetNowPosFromAngle(angle, sphereCentersPos[curBall]);
             spheres[0].transform.position = v;
         }
     }
