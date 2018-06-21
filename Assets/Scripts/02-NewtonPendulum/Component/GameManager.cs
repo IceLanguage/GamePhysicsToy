@@ -71,25 +71,11 @@ namespace LinHowe_GamePhysics.NewtonPendulum
             //更新牛顿摆
             UpdateNewtonPendulum();
         }
-        //IEnumerator UpdatePendulum()
-        //{
-        //    yield return new WaitForSeconds(3.5f);
-        //    UpdateNewtonPendulum();
-        //}
         //检测碰撞
         private void CollisionDetection()
         {
             for (int i = 0; i < spheres.Length; ++i)
             {
-                //for (int j = i+1; j < spheres.Length; ++j)
-                //{
-
-                //    if (IntersectionTest.Check_Sphere_Sphere(spheres[i].Sphere, spheres[j].Sphere))
-                //    {
-                //        spheresVelocity[j] += spheresVelocity[i];
-                //        spheresVelocity[i] = Vector3.zero;
-                //    }
-                //}
                 if (curBall == i) continue;
                 if (IntersectionTest.Check_Sphere_Sphere(spheres[i].Sphere, spheres[curBall].Sphere))
                 {
